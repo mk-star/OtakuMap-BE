@@ -54,6 +54,11 @@
 
 <br/>
 
+## CI/CD
+![image](https://github.com/user-attachments/assets/c9174daf-054b-4928-a28d-da037ec867b1)
+
+<br/>
+
 ## 프로젝트 오버뷰
 ![image](https://github.com/user-attachments/assets/47f99501-c8af-4d9c-9096-a22e32481ddf)
 ![image](https://github.com/user-attachments/assets/feb634de-7cf6-4c84-85bc-9b82fbf2147e)
