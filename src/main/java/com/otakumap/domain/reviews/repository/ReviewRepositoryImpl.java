@@ -5,6 +5,7 @@ import com.otakumap.domain.event.entity.QEvent;
 import com.otakumap.domain.event_review.entity.EventReview;
 import com.otakumap.domain.event_review.entity.QEventReview;
 import com.otakumap.domain.event_review.repository.EventReviewRepository;
+import com.otakumap.domain.image.entity.QImage;
 import com.otakumap.domain.mapping.QEventAnimation;
 import com.otakumap.domain.mapping.QPlaceAnimation;
 import com.otakumap.domain.mapping.QPlaceReviewPlace;
@@ -28,6 +29,8 @@ import com.otakumap.global.apiPayload.exception.handler.ReviewHandler;
 import com.otakumap.global.apiPayload.exception.handler.SearchHandler;
 import com.otakumap.global.apiPayload.exception.handler.TransactionHandler;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -140,13 +143,16 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
         QPlaceReview placeReview = QPlaceReview.placeReview;
         QEventReview eventReview = QEventReview.eventReview;
 
-        List<PlaceReview> placeReviews = queryFactory.select(placeReview)
-                .from(placeReview)
+        List<PlaceReview> placeReviews = queryFactory
+                .selectFrom(placeReview)
+                .leftJoin(placeReview.images, QImage.image).fetchJoin()
                 .orderBy(placeReview.view.desc())
                 .limit(7)
                 .fetch();
-        List<EventReview> eventReviews = queryFactory.select(eventReview)
-                .from(eventReview)
+
+        List<EventReview> eventReviews = queryFactory
+                .selectFrom(eventReview)
+                .leftJoin(eventReview.images, QImage.image).fetchJoin()
                 .orderBy(eventReview.view.desc())
                 .limit(7)
                 .fetch();

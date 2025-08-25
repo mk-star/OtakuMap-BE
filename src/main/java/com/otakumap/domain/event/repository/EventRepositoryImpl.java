@@ -62,6 +62,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
         QEvent event = QEvent.event;
 
         List<Event> targetEvents = queryFactory.selectFrom(event)
+                .leftJoin(event.thumbnailImage).fetchJoin()
                 .where(event.endDate.goe(LocalDate.now())
                         .and(event.startDate.loe(LocalDate.now()))
                         .and(event.thumbnailImage.isNotNull()))
