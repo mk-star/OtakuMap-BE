@@ -34,6 +34,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -145,14 +146,12 @@ public class ReviewRepositoryImpl implements ReviewRepositoryCustom {
 
         List<PlaceReview> placeReviews = queryFactory
                 .selectFrom(placeReview)
-                .leftJoin(placeReview.images, QImage.image).fetchJoin()
                 .orderBy(placeReview.view.desc())
                 .limit(7)
                 .fetch();
 
         List<EventReview> eventReviews = queryFactory
                 .selectFrom(eventReview)
-                .leftJoin(eventReview.images, QImage.image).fetchJoin()
                 .orderBy(eventReview.view.desc())
                 .limit(7)
                 .fetch();

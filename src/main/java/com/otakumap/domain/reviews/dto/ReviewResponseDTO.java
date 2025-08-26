@@ -27,7 +27,7 @@ public class ReviewResponseDTO {
     public static class Top7ReviewPreViewDTO {
         private Long id;
         private String title;
-        private ImageResponseDTO.ImageDTO reviewImage;
+        private String reviewImage;
         private Long view;
         private String type;
         private LocalDateTime createdAt;

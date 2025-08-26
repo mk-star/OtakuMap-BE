@@ -14,6 +14,7 @@ import com.otakumap.global.apiPayload.exception.handler.EventHandler;
 import com.otakumap.global.apiPayload.exception.handler.PlaceHandler;
 import com.otakumap.global.apiPayload.exception.handler.ReviewHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,7 @@ public class ReviewQueryServiceImpl implements ReviewQueryService {
     }
 
     @Override
+    @Cacheable(value = "reviews", key = "'top_7'")
     public ReviewResponseDTO.Top7ReviewPreViewListDTO getTop7Reviews() {
         return reviewRepositoryCustom.getTop7Reviews();
     }
