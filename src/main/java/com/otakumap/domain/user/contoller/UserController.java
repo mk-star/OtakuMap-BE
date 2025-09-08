@@ -1,6 +1,6 @@
 package com.otakumap.domain.user.contoller;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.event_review.service.EventReviewCommandService;
 import com.otakumap.domain.place_review.service.PlaceReviewCommandService;
 import com.otakumap.domain.user.converter.UserConverter;

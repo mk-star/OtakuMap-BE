@@ -1,6 +1,6 @@
 package com.otakumap.domain.event_short_review_reaction.controller;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.event_short_review_reaction.dto.EventShortReviewReactionResponseDTO;
 import com.otakumap.domain.event_short_review_reaction.converter.EventShortReviewReactionConverter;
 import com.otakumap.domain.event_short_review_reaction.entity.EventShortReviewReaction;

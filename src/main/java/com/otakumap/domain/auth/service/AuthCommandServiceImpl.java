@@ -2,9 +2,9 @@ package com.otakumap.domain.auth.service;
 
 import com.otakumap.domain.auth.dto.AuthRequestDTO;
 import com.otakumap.domain.auth.dto.AuthResponseDTO;
-import com.otakumap.domain.auth.jwt.dto.JwtDTO;
-import com.otakumap.domain.auth.jwt.userdetails.PrincipalDetails;
-import com.otakumap.domain.auth.jwt.util.JwtProvider;
+import com.otakumap.global.security.jwt.dto.JwtDTO;
+import com.otakumap.global.security.PrincipalDetails;
+import com.otakumap.global.security.jwt.util.JwtProvider;
 import com.otakumap.domain.image.entity.Image;
 import com.otakumap.domain.image.repository.ImageRepository;
 import com.otakumap.domain.user.converter.UserConverter;
@@ -15,7 +15,6 @@ import com.otakumap.global.apiPayload.exception.handler.AuthHandler;
 import com.otakumap.global.util.RedisUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.MailException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,7 +30,6 @@ public class AuthCommandServiceImpl implements AuthCommandService {
     private final RedisUtil redisUtil;
     private final MailService mailService;
     private final JwtProvider jwtProvider;
-    private final ImageRepository imageRepository;
 
     @Override
     public User signup(AuthRequestDTO.SignupDTO request) {
@@ -41,9 +39,6 @@ public class AuthCommandServiceImpl implements AuthCommandService {
         User newUser = UserConverter.toUser(request);
         newUser.encodePassword(passwordEncoder.encode(request.getPassword()));
 
-        // 기본 이미지는 항상 PK값을 1로 가져오도록 설정
-        Image profileImage = imageRepository.findById(1L).orElseThrow(() -> new AuthHandler(ErrorStatus.IMAGE_NOT_FOUND));
-        newUser.setProfileImage(profileImage);
         return userRepository.save(newUser);
     }
 
@@ -55,13 +50,13 @@ public class AuthCommandServiceImpl implements AuthCommandService {
             throw new AuthHandler(ErrorStatus.PASSWORD_NOT_EQUAL);
         }
 
-        PrincipalDetails memberDetails = new PrincipalDetails(user);
+        Long userId = user.getId();
 
         // 로그인 성공 시 토큰 생성
-        String accessToken = jwtProvider.createAccessToken(memberDetails, user.getId());
-        String refreshToken = jwtProvider.createRefreshToken(memberDetails, user.getId());
+        String accessToken = jwtProvider.createAccessToken(userId);
+        String refreshToken = jwtProvider.createRefreshToken(userId);
 
-        return UserConverter.toLoginResultDTO(user, accessToken, refreshToken);
+        return UserConverter.toLoginResultDTO(userId, accessToken, refreshToken);
     }
 
     @Override
@@ -88,10 +83,10 @@ public class AuthCommandServiceImpl implements AuthCommandService {
     }
 
     @Override
-    public JwtDTO reissueToken(String refreshToken) {
+    public JwtDTO reissueToken(JwtDTO request) {
         try {
-            jwtProvider.validateRefreshToken(refreshToken);
-            return jwtProvider.reissueToken(refreshToken);
+            jwtProvider.validateRefreshToken(request);
+            return jwtProvider.reissueToken(request);
         } catch (ExpiredJwtException eje) {
             throw new AuthHandler(ErrorStatus.TOKEN_EXPIRED);
         } catch (IllegalArgumentException iae) {
@@ -100,14 +95,17 @@ public class AuthCommandServiceImpl implements AuthCommandService {
     }
 
     @Override
-    public void logout(HttpServletRequest request) {
+    public void logout(JwtDTO request) {
         try {
-            String accessToken = jwtProvider.resolveAccessToken(request);
             // 블랙리스트에 저장
-            redisUtil.set(accessToken, "logout");
-            redisUtil.expire(accessToken, jwtProvider.getExpTime(accessToken), TimeUnit.MILLISECONDS);
+            String accessToken = request.getAccessToken();
+            String key = "AT::" + accessToken;
+            redisUtil.set(key, "logout");
+            redisUtil.expire(key, jwtProvider.getExpTime(accessToken), TimeUnit.MILLISECONDS);
+
             // RefreshToken 삭제
-            redisUtil.delete(jwtProvider.getEmail(accessToken));
+            redisUtil.delete("RT::" + request.getRefreshToken());
+
         } catch (ExpiredJwtException e) {
             throw new AuthHandler(ErrorStatus.TOKEN_EXPIRED);
         }

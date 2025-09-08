@@ -34,6 +34,10 @@ public class User extends BaseEntity {
     @Column(length = 20)
     private String userId;
 
+    // 소셜 로그인 식별자 값. 일반 로그인인 경우 null
+    @Column
+    private String socialId;
+
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
@@ -75,9 +79,8 @@ public class User extends BaseEntity {
     @ColumnDefault("0")
     private Long totalPoint = 0L;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "profile_image_id", referencedColumnName = "id")
-    private Image profileImage;
+    @Column(name = "profile_image_id")
+    private String profileImage;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<PlaceLike> placeLikes = new ArrayList<>();
@@ -99,8 +102,8 @@ public class User extends BaseEntity {
         else { this.isEventBenefitsNotified = isEnabled; }
     }
 
-    public void setProfileImage(Image image) {
-        this.profileImage = image;
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
     }
 
     public void updateEmail(String email) {

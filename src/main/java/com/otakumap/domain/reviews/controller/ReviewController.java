@@ -1,6 +1,6 @@
 package com.otakumap.domain.reviews.controller;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.reviews.dto.ReviewRequestDTO;
 import com.otakumap.domain.reviews.dto.ReviewResponseDTO;
 import com.otakumap.domain.reviews.enums.ReviewType;

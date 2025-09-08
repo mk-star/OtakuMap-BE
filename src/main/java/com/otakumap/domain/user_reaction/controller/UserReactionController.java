@@ -1,6 +1,6 @@
 package com.otakumap.domain.user_reaction.controller;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.user.entity.User;
 import com.otakumap.domain.user_reaction.DTO.UserReactionResponseDTO;
 import com.otakumap.domain.user_reaction.converter.UserReactionConverter;

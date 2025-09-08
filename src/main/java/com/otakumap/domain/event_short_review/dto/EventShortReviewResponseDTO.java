@@ -20,7 +20,7 @@ public class EventShortReviewResponseDTO {
         String content;
         Float rating;
         String userName;
-        ImageResponseDTO.ImageDTO profileImage;
+        String profileImage;
         int likes;
         int dislikes;
     }
@@ -44,7 +44,7 @@ public class EventShortReviewResponseDTO {
         private EventShortReviewUserDTO user;
         private String content;
         private Float rating;
-        private ImageResponseDTO.ImageDTO profileImage;
+        private String profileImage;
     }
 
     @Builder

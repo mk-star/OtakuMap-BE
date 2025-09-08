@@ -1,6 +1,6 @@
 package com.otakumap.domain.event.controller;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.event.converter.EventConverter;
 import com.otakumap.domain.event.dto.EventResponseDTO;
 import com.otakumap.domain.event.service.EventCustomService;
@@ -27,7 +27,7 @@ public class EventController {
 
     @Operation(summary = "진행 중인 인기 이벤트 조회", description = "진행 중인 인기 이벤트의 목록(8개)를 불러옵니다.")
     @GetMapping("/events/popular")
-    public ApiResponse<List<EventResponseDTO.EventWithLikeDTO>> getEventDetail(@CurrentUser User user) {
+    public ApiResponse<List<EventResponseDTO.EventWithLikeDTO>> getEventDetail(@CurrentUser User user) throws InterruptedException {
         return ApiResponse.onSuccess(eventCustomService.getPopularEvents(user));
     }
 

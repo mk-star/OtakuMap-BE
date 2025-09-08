@@ -1,6 +1,6 @@
 package com.otakumap.domain.notification.controller;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.notification.converter.NotificationConverter;
 import com.otakumap.domain.notification.dto.NotificationResponseDTO;
 import com.otakumap.domain.notification.entity.Notification;

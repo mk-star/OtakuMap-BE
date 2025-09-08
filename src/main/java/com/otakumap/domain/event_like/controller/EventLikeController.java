@@ -1,6 +1,6 @@
 package com.otakumap.domain.event_like.controller;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.event_like.converter.EventLikeConverter;
 import com.otakumap.domain.event_like.dto.EventLikeRequestDTO;
 import com.otakumap.domain.event_like.dto.EventLikeResponseDTO;
@@ -8,7 +8,6 @@ import com.otakumap.domain.event_like.service.EventLikeCommandService;
 import com.otakumap.domain.event_like.service.EventLikeQueryService;
 import com.otakumap.domain.user.entity.User;
 import com.otakumap.global.apiPayload.ApiResponse;
-import com.otakumap.global.validation.annotation.ExistEventLike;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;

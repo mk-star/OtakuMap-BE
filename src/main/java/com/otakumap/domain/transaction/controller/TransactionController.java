@@ -1,7 +1,7 @@
 package com.otakumap.domain.transaction.controller;
 
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.transaction.dto.TransactionResponseDTO;
 import com.otakumap.domain.transaction.service.TransactionQueryService;
 import com.otakumap.domain.user.entity.User;

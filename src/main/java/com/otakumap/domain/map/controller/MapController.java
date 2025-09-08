@@ -1,6 +1,6 @@
 package com.otakumap.domain.map.controller;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.map.dto.MapResponseDTO;
 import com.otakumap.domain.map.service.MapCustomService;
 import com.otakumap.domain.user.entity.User;

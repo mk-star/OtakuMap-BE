@@ -1,6 +1,6 @@
 package com.otakumap.domain.route_like.controller;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.route_like.converter.RouteLikeConverter;
 import com.otakumap.domain.route_like.dto.RouteLikeRequestDTO;
 import com.otakumap.domain.route_like.dto.RouteLikeResponseDTO;

@@ -61,7 +61,7 @@ public class ReviewResponseDTO {
         List<ImageResponseDTO.ImageDTO> reviewImages;
 
         String nickname;
-        ImageResponseDTO.ImageDTO profileImage;
+        String profileImage;
         LocalDateTime createdAt;
 
         RouteResponseDTO.RouteDTO route;

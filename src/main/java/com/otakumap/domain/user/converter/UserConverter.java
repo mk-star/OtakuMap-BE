@@ -6,7 +6,6 @@ import com.otakumap.domain.place_review.entity.PlaceReview;
 import com.otakumap.domain.user.dto.UserResponseDTO;
 import com.otakumap.domain.user.entity.User;
 import com.otakumap.domain.user.entity.enums.Role;
-import com.otakumap.domain.user.entity.enums.SocialType;
 import com.otakumap.domain.user.entity.enums.UserStatus;
 import com.otakumap.global.util.UuidGenerator;
 import org.springframework.data.domain.Page;
@@ -36,9 +35,9 @@ public class UserConverter {
                 .build();
     }
 
-    public static AuthResponseDTO.LoginResultDTO toLoginResultDTO(User user, String accessToken, String refreshToken) {
+    public static AuthResponseDTO.LoginResultDTO toLoginResultDTO(Long userId, String accessToken, String refreshToken) {
         return AuthResponseDTO.LoginResultDTO.builder()
-                .id(user.getId())
+                .id(userId)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -63,36 +62,9 @@ public class UserConverter {
                 .build();
     }
 
-    public static User toKakaoUser(KakaoUserInfo kakaoUserInfo) {
-        return User.builder()
-                .name(kakaoUserInfo.getKakao_account().getProfile().getNickname())
-                .nickname(UuidGenerator.generateUuid())
-                .email(kakaoUserInfo.getKakao_account().getEmail())
-                .socialType(SocialType.KAKAO)
-                .build();
-    }
-
-    public static User toGoogleUser(GoogleUserInfo googleUserInfo) {
-        return User.builder()
-                .name(googleUserInfo.getName())
-                .nickname(UuidGenerator.generateUuid())
-                .email(googleUserInfo.getEmail())
-                .socialType(SocialType.GOOGLE)
-                .build();
-    }
-
-    public static User toNaverUser(NaverUserInfo naverUserInfo) {
-        return User.builder()
-                .name(naverUserInfo.getResponse().getName())
-                .nickname(UuidGenerator.generateUuid())
-                .email(naverUserInfo.getResponse().getEmail())
-                .socialType(SocialType.NAVER)
-                .build();
-    }
-
     public static UserResponseDTO.UserInfoResponseDTO toUserInfoResponseDTO(User user) {
         return UserResponseDTO.UserInfoResponseDTO.builder()
-                .profileImageUrl(user.getProfileImage() == null ? null : user.getProfileImage().getFileUrl())
+                .profileImageUrl(user.getProfileImage() == null ? null : user.getProfileImage())
                 .nickname(user.getNickname())
                 .email(user.getEmail())
                 .donation(user.getDonation())

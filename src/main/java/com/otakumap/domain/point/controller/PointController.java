@@ -1,6 +1,6 @@
 package com.otakumap.domain.point.controller;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.payment.service.PaymentCommandService;
 import com.otakumap.domain.point.converter.PointConverter;
 import com.otakumap.domain.point.dto.PointResponseDTO;

@@ -1,11 +1,12 @@
-package com.otakumap.domain.auth.jwt.resolver;
+package com.otakumap.global.security.jwt.resolver;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
-import com.otakumap.domain.auth.jwt.userdetails.PrincipalDetails;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.PrincipalDetails;
 import com.otakumap.domain.user.entity.User;
 import com.otakumap.domain.user.service.UserQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,26 +20,20 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @RequiredArgsConstructor
 @Slf4j
 public class CurrentUserResolver implements HandlerMethodArgumentResolver {
-    private final UserQueryService userQueryService;
-
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(CurrentUser.class) && parameter.getParameterType().isAssignableFrom(User.class);
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+    public Object resolveArgument(@NotNull MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-
-        if (authentication != null) {
+        if (authentication != null && authentication.isAuthenticated()) {
             Object principal = authentication.getPrincipal();
-            // principal이 PrincipalDetails 타입이 아니면 (문자열 "anonymousUser"인 경우) null 반환
-            if (!(principal instanceof PrincipalDetails)) {
-                return null;
+            if (principal instanceof PrincipalDetails) {
+                return principal;
             }
-            PrincipalDetails principalDetails = (PrincipalDetails) principal;
-            return userQueryService.getUserByEmail(principalDetails.getUsername());
         }
         return null;
     }

@@ -24,35 +24,19 @@ import java.util.stream.Collectors;
 public class ReviewConverter {
 
     public static ReviewResponseDTO.Top7ReviewPreViewDTO toTop7EventReviewPreViewDTO(EventReview eventReview) {
-        List<Image> images = eventReview.getImages();
-        ImageResponseDTO.ImageDTO imageDTO = null;
-        if(images != null && !images.isEmpty()) {
-            imageDTO = ImageConverter.toImageDTO(images.get(0));
-        }
-
         return ReviewResponseDTO.Top7ReviewPreViewDTO.builder()
                 .id(eventReview.getId())
                 .title(eventReview.getTitle())
                 .reviewImage(eventReview.getImages().get(0).getFileUrl())
-                .view(eventReview.getView())
-                .createdAt(eventReview.getCreatedAt())
                 .type("event")
                 .build();
     }
 
     public static ReviewResponseDTO.Top7ReviewPreViewDTO toTop7PlaceReviewPreViewDTO(PlaceReview eventReview) {
-        List<Image> images = eventReview.getImages();
-        ImageResponseDTO.ImageDTO imageDTO = null;
-        if(images != null && !images.isEmpty()) {
-            imageDTO = ImageConverter.toImageDTO(images.get(0));
-        }
-
         return ReviewResponseDTO.Top7ReviewPreViewDTO.builder()
                 .id(eventReview.getId())
                 .title(eventReview.getTitle())
                 .reviewImage(eventReview.getImages().get(0).getFileUrl())
-                .view(eventReview.getView())
-                .createdAt(eventReview.getCreatedAt())
                 .type("place")
                 .build();
     }
@@ -101,7 +85,7 @@ public class ReviewConverter {
                         .map(ImageConverter::toImageDTO)
                         .toList())
                 .nickname(placeReview.getUser().getNickname())
-                .profileImage(ImageConverter.toImageDTO(placeReview.getUser().getProfileImage()))
+                .profileImage(placeReview.getUser().getProfileImage())
                 .createdAt(placeReview.getCreatedAt())
                 .route(placeReview.getRoutes().isEmpty() ? null : RouteConverter.toRouteDTO(placeReview.getRoutes().get(0)))
                 .build();
@@ -120,7 +104,7 @@ public class ReviewConverter {
                         .map(ImageConverter::toImageDTO)
                         .toList())
                 .nickname(eventReview.getUser().getNickname())
-                .profileImage(ImageConverter.toImageDTO(eventReview.getUser().getProfileImage()))
+                .profileImage(eventReview.getUser().getProfileImage())
                 .createdAt(eventReview.getCreatedAt())
                 .route(eventReview.getRoutes().isEmpty() ? null : RouteConverter.toRouteDTO(eventReview.getRoutes().get(0)))
                 .build();

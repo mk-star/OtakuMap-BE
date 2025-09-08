@@ -1,4 +1,4 @@
-package com.otakumap.domain.auth.jwt.annotation;
+package com.otakumap.global.security.jwt.annotation;
 
 import io.swagger.v3.oas.annotations.Parameter;
 

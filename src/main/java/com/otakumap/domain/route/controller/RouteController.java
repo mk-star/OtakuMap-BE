@@ -1,6 +1,6 @@
 package com.otakumap.domain.route.controller;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.place.DTO.PlaceResponseDTO;
 import com.otakumap.domain.place.service.PlaceQueryService;
 import com.otakumap.domain.route.dto.RouteResponseDTO;

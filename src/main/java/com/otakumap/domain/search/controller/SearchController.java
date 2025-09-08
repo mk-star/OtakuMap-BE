@@ -1,6 +1,6 @@
 package com.otakumap.domain.search.controller;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.search.dto.SearchResponseDTO;
 import com.otakumap.domain.search.service.SearchService;
 import com.otakumap.domain.user.entity.User;

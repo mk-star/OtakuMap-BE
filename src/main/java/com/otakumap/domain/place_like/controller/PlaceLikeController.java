@@ -1,6 +1,6 @@
 package com.otakumap.domain.place_like.controller;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.place_like.converter.PlaceLikeConverter;
 import com.otakumap.domain.place_like.dto.PlaceLikeRequestDTO;
 import com.otakumap.domain.place_like.dto.PlaceLikeResponseDTO;

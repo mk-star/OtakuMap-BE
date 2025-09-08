@@ -17,7 +17,7 @@ public class PlaceShortReviewConverter {
         return PlaceShortReviewResponseDTO.PlaceShortReviewUserDTO.builder()
                 .userId(user.getId())
                 .nickname(user.getNickname())
-                .profileImage(user.getProfileImage().getFileUrl())
+                .profileImage(user.getProfileImage())
                 .build();
     }
 

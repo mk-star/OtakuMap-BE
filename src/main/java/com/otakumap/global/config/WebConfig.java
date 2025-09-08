@@ -1,6 +1,6 @@
 package com.otakumap.global.config;
 
-import com.otakumap.domain.auth.jwt.resolver.CurrentUserResolver;
+import com.otakumap.global.security.jwt.resolver.CurrentUserResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

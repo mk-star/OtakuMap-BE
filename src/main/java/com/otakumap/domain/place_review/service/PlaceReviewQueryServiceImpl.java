@@ -76,7 +76,7 @@ public class PlaceReviewQueryServiceImpl implements PlaceReviewQueryService {
                 .filter(review -> review.getAnimation() != null)
                 .collect(Collectors.groupingBy(PlaceReview::getAnimation));
 
-        // 애니메이션 그룹마다 그 안에 속한 리뷰들 페이징 적용
+        // 애니메이션 그룹마다 그 안에 속한 리뷰들 페이징 적용퍋ㅈ
         List<PlaceReviewResponseDTO.AnimationReviewGroupDTO> animationGroups = paginateReviews(reviewsByAnimation, animationHashTagMap, page, size);
 
         // 총 리뷰 수 계산

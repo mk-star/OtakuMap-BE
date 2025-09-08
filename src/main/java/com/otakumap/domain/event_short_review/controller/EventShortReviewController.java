@@ -1,11 +1,10 @@
 package com.otakumap.domain.event_short_review.controller;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.event_short_review.converter.EventShortReviewConverter;
 import com.otakumap.domain.event_short_review.dto.EventShortReviewRequestDTO;
 import com.otakumap.domain.event_short_review.dto.EventShortReviewResponseDTO;
 import com.otakumap.domain.event_short_review.entity.EventShortReview;
-import com.otakumap.domain.event_short_review.repository.EventShortReviewRepository;
 import com.otakumap.domain.event_short_review.service.EventShortReviewCommandService;
 import com.otakumap.domain.user.entity.User;
 import com.otakumap.global.apiPayload.ApiResponse;

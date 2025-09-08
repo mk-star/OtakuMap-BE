@@ -2,7 +2,7 @@ package com.otakumap.domain.auth.controller;
 
 import com.otakumap.domain.auth.dto.AuthRequestDTO;
 import com.otakumap.domain.auth.dto.AuthResponseDTO;
-import com.otakumap.domain.auth.jwt.dto.JwtDTO;
+import com.otakumap.global.security.jwt.dto.JwtDTO;
 import com.otakumap.domain.auth.service.AuthCommandService;
 import com.otakumap.domain.auth.service.AuthQueryService;
 import com.otakumap.domain.auth.service.*;
@@ -11,7 +11,6 @@ import com.otakumap.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthCommandService authCommandService;
     private final AuthQueryService authQueryService;
-    private final SocialAuthService socialAuthService;
 
     @Operation(summary = "회원가입", description = "회원가입 기능입니다.")
     @PostMapping("/signup")
@@ -65,35 +63,34 @@ public class AuthController {
 
     @Operation(summary = "토큰 재발급", description = "accessToken이 만료 시 refreshToken을 통해 accessToken을 재발급합니다.")
     @PostMapping("/reissue")
-    @Parameter(name = "RefreshToken", description = "리프레시 토큰")
-    public ApiResponse<JwtDTO> reissueToken(@RequestHeader("RefreshToken") String refreshToken) {
+    public ApiResponse<JwtDTO> reissueToken(@RequestBody JwtDTO refreshToken) {
         return ApiResponse.onSuccess(authCommandService.reissueToken(refreshToken));
     }
 
     @Operation(summary = "로그아웃", description = "로그아웃 기능입니다.")
     @PostMapping("/logout")
-    public ApiResponse<String> logout(HttpServletRequest request) {
+    public ApiResponse<String> logout(@RequestBody JwtDTO request) {
         authCommandService.logout(request);
         return ApiResponse.onSuccess("로그아웃 되었습니다.");
     }
 
-    @Operation(summary = "카카오 로그인", description = "카카오 인가 코드를 입력받아 로그인을 처리합니다.")
-    @PostMapping("/social/kakao")
-    public ApiResponse<AuthResponseDTO.LoginResultDTO> kakaoLogin(@Valid @RequestBody AuthRequestDTO.SocialLoginDTO request) {
-        return ApiResponse.onSuccess(socialAuthService.login("kakao", request));
-    }
-
-    @Operation(summary = "구글 로그인", description = "구글 인가 코드를 입력받아 로그인을 처리합니다.")
-    @PostMapping("/social/google")
-    public ApiResponse<AuthResponseDTO.LoginResultDTO> googleLogin(@Valid @RequestBody AuthRequestDTO.SocialLoginDTO request) {
-        return ApiResponse.onSuccess(socialAuthService.login("google", request));
-    }
-
-    @Operation(summary = "네이버 로그인", description = "네이버 인가 코드를 입력받아 로그인을 처리합니다.")
-    @PostMapping("/social/naver")
-    public ApiResponse<AuthResponseDTO.LoginResultDTO> naverLogin(@Valid @RequestBody AuthRequestDTO.SocialLoginDTO request) {
-        return ApiResponse.onSuccess(socialAuthService.login("naver", request));
-    }
+//    @Operation(summary = "카카오 로그인", description = "카카오 인가 코드를 입력받아 로그인을 처리합니다.")
+//    @PostMapping("/social/kakao")
+//    public ApiResponse<AuthResponseDTO.LoginResultDTO> kakaoLogin(@Valid @RequestBody AuthRequestDTO.SocialLoginDTO request) {
+//        return ApiResponse.onSuccess(socialAuthService.login("kakao", request));
+//    }
+//
+//    @Operation(summary = "구글 로그인", description = "구글 인가 코드를 입력받아 로그인을 처리합니다.")
+//    @PostMapping("/social/google")
+//    public ApiResponse<AuthResponseDTO.LoginResultDTO> googleLogin(@Valid @RequestBody AuthRequestDTO.SocialLoginDTO request) {
+//        return ApiResponse.onSuccess(socialAuthService.login("google", request));
+//    }
+//
+//    @Operation(summary = "네이버 로그인", description = "네이버 인가 코드를 입력받아 로그인을 처리합니다.")
+//    @PostMapping("/social/naver")
+//    public ApiResponse<AuthResponseDTO.LoginResultDTO> naverLogin(@Valid @RequestBody AuthRequestDTO.SocialLoginDTO request) {
+//        return ApiResponse.onSuccess(socialAuthService.login("naver", request));
+//    }
 
     @Operation(summary = "아이디 찾기", description = "아이디 찾기 기능입니다.")
     @GetMapping("/find-id")

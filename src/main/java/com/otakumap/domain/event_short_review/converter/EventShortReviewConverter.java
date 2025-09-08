@@ -28,7 +28,7 @@ public class EventShortReviewConverter {
                 .eventId(eventShortReview.getEvent().getId())
                 .content(eventShortReview.getContent())
                 .rating(eventShortReview.getRating())
-                .profileImage(ImageConverter.toImageDTO(eventShortReview.getUser().getProfileImage()))
+                .profileImage(eventShortReview.getUser().getProfileImage())
                 .build();
     }
 
@@ -38,7 +38,7 @@ public class EventShortReviewConverter {
                 .user(EventShortReviewConverter.toEventShortReviewUserDTO(eventShortReview.getUser()))
                 .content(eventShortReview.getContent())
                 .rating(eventShortReview.getRating())
-                .profileImage(ImageConverter.toImageDTO(eventShortReview.getUser().getProfileImage()))
+                .profileImage(eventShortReview.getUser().getProfileImage())
                 .build();
     }
 
@@ -57,7 +57,7 @@ public class EventShortReviewConverter {
       return EventShortReviewResponseDTO.EventShortReviewUserDTO.builder()
               .userId(user.getId())
               .nickname(user.getNickname())
-              .profileImage(user.getProfileImage().getFileUrl())
+              .profileImage(user.getProfileImage())
               .build();
     }
 }

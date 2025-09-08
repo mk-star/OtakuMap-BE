@@ -73,7 +73,7 @@ public class UserCommandServiceImpl implements UserCommandService {
     @Override
     public String updateProfileImage(User user, MultipartFile file) {
         Image image = imageCommandService.uploadProfileImage(file, user.getId());
-        user.setProfileImage(image);
+        user.setProfileImage(image.getFileUrl());
         userRepository.save(user);
         return image.getFileUrl();
     }

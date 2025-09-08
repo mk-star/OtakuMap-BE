@@ -1,6 +1,6 @@
 package com.otakumap.domain.place_short_review.controller;
 
-import com.otakumap.domain.auth.jwt.annotation.CurrentUser;
+import com.otakumap.global.security.jwt.annotation.CurrentUser;
 import com.otakumap.domain.place_short_review.dto.PlaceShortReviewResponseDTO;
 import com.otakumap.domain.place_short_review.converter.PlaceShortReviewConverter;
 import com.otakumap.domain.place_short_review.dto.PlaceShortReviewRequestDTO;

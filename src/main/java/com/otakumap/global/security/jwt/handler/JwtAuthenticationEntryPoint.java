@@ -1,4 +1,4 @@
-package com.otakumap.domain.auth.jwt.handler;
+package com.otakumap.global.security.jwt.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otakumap.global.apiPayload.ApiResponse;

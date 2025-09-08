@@ -1,4 +1,4 @@
-package com.otakumap.domain.auth.jwt.userdetails;
+package com.otakumap.global.security;
 
 import com.otakumap.domain.user.entity.User;
 import com.otakumap.domain.user.repository.UserRepository;
@@ -18,6 +18,11 @@ public class PrincipalDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new AuthHandler(ErrorStatus.USER_NOT_FOUND));
+        return new PrincipalDetails(user);
+    }
+
+    public UserDetails loadUserById(Long id) throws UsernameNotFoundException {
+        User user = userRepository.findById(id).orElseThrow(() -> new AuthHandler(ErrorStatus.USER_NOT_FOUND));
         return new PrincipalDetails(user);
     }
 }
