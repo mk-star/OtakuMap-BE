@@ -69,6 +69,10 @@ public class Event extends BaseEntity {
     @JoinColumn(name = "event_location_id")
     private EventLocation eventLocation;
 
+    // 랜덤 조회용 컬럼
+    @Column(name = "rand_id", nullable = false)
+    private int randId;
+
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<EventLike> eventLikeList = new ArrayList<>();
 

@@ -13,6 +13,7 @@ import com.otakumap.domain.user.entity.User;
 import com.otakumap.global.apiPayload.code.status.ErrorStatus;
 import com.otakumap.global.apiPayload.exception.handler.EventHandler;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,19 +37,21 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
     private final JPAQueryFactory queryFactory;
     private final EventLikeRepository eventLikeRepository;
 
+
     @Override
     public List<EventResponseDTO.EventWithLikeDTO> getPopularEvents(User user) {
         QEvent event = QEvent.event;
 
+        long maxRandId = 100_000_000L;
+        long randomValue = (long) (Math.random() * maxRandId);
+
         List<Event> events = queryFactory.selectFrom(event)
                 .where(event.endDate.goe(LocalDate.now())
-                        .and(event.startDate.loe(LocalDate.now())))
+                        .and(event.startDate.loe(LocalDate.now()))
+                        .and(event.randId.gt(randomValue)))
+                .orderBy(event.randId.asc()) // 인덱스 활용
+                .limit(8)
                 .fetch();
-
-        if(events.size() > 8) {
-            Collections.shuffle(events);
-            events = events.subList(0, 8);
-        }
 
         return events.stream()
                 .map(eve -> {
