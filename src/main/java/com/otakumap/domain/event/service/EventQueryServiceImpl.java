@@ -24,10 +24,6 @@ public class EventQueryServiceImpl implements EventQueryService{
     private final EventRepository eventRepository;
     private final SearchRepositoryCustom searchRepository;
 
-    @Cacheable(
-            value = "events",
-            key = "#eventId"
-    )
     @Override
     public EventResponseDTO.EventDetailDTO getEventDetail(Long eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventHandler(ErrorStatus.EVENT_NOT_FOUND));

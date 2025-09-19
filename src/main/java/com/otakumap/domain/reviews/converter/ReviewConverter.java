@@ -28,7 +28,9 @@ public class ReviewConverter {
                 .id(eventReview.getId())
                 .title(eventReview.getTitle())
                 .reviewImage(eventReview.getImages().get(0).getFileUrl())
+                .view(eventReview.getView())
                 .type("event")
+                .createdAt(eventReview.getCreatedAt())
                 .build();
     }
 
@@ -37,7 +39,9 @@ public class ReviewConverter {
                 .id(eventReview.getId())
                 .title(eventReview.getTitle())
                 .reviewImage(eventReview.getImages().get(0).getFileUrl())
+                .view(eventReview.getView())
                 .type("place")
+                .createdAt(eventReview.getCreatedAt())
                 .build();
     }
 

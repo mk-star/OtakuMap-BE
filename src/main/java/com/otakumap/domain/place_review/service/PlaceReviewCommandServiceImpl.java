@@ -3,6 +3,7 @@ package com.otakumap.domain.place_review.service;
 import com.otakumap.domain.place_review.repository.PlaceReviewRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 @Service

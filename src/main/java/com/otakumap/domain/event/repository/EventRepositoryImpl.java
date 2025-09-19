@@ -9,11 +9,11 @@ import com.otakumap.domain.event.entity.enums.Genre;
 import com.otakumap.domain.event_like.repository.EventLikeRepository;
 import com.otakumap.domain.image.converter.ImageConverter;
 import com.otakumap.domain.image.dto.ImageResponseDTO;
+import com.otakumap.domain.image.entity.QImage;
 import com.otakumap.domain.user.entity.User;
 import com.otakumap.global.apiPayload.code.status.ErrorStatus;
 import com.otakumap.global.apiPayload.exception.handler.EventHandler;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,15 +37,16 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
     private final JPAQueryFactory queryFactory;
     private final EventLikeRepository eventLikeRepository;
 
-
     @Override
     public List<EventResponseDTO.EventWithLikeDTO> getPopularEvents(User user) {
         QEvent event = QEvent.event;
+        QImage image = QImage.image;
 
         long maxRandId = 100_000_000L;
         long randomValue = (long) (Math.random() * maxRandId);
 
         List<Event> events = queryFactory.selectFrom(event)
+                .join(event.thumbnailImage, image).fetchJoin()
                 .where(event.endDate.goe(LocalDate.now())
                         .and(event.startDate.loe(LocalDate.now()))
                         .and(event.randId.gt(randomValue)))
