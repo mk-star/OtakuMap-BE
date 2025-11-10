@@ -6,6 +6,7 @@ import java.util.Map;
 
 @Getter
 public class NaverOAuth2UserInfo extends OAuth2UserInfo {
+
     public NaverOAuth2UserInfo(Map<String, Object> attributes) {
         super(attributes);
     }

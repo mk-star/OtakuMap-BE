@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.ResponseCookie;
 
 import java.time.LocalDateTime;
 
@@ -24,16 +25,6 @@ public class AuthResponseDTO {
     public static class LoginResultDTO {
         Long id;
         String accessToken;
-        String refreshToken;
-    }
-
-
-    @Getter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Builder
-    public static class CheckNicknameResultDTO {
-        boolean isDuplicated;
     }
 
     @Getter

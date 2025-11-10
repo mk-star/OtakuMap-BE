@@ -4,9 +4,6 @@ import com.otakumap.global.security.jwt.filter.JwtFilter;
 import com.otakumap.global.security.jwt.handler.JwtAuthenticationEntryPoint;
 import com.otakumap.global.security.oauth.handler.OAuth2LoginSuccessHandler;
 import com.otakumap.global.security.oauth.handler.OAuth2LoginFailureHandler;
-import com.otakumap.global.security.PrincipalDetailsService;
-import com.otakumap.global.security.jwt.util.JwtProvider;
-import com.otakumap.global.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,10 +11,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -27,9 +24,7 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-    private final JwtProvider jwtProvider;
-    private final RedisUtil redisUtil;
-    private final PrincipalDetailsService principalDetailsService;
+    private final JwtFilter jwtFilter;
 
     private final String[] allowUrl = {
             "/",
@@ -65,8 +60,11 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 // BasicHttp 비활성화
                 .httpBasic(AbstractHttpConfigurer::disable)
-                //JwtAuthFilter를 UsernamePasswordAuthenticationFilter 앞에 추가
-                .addFilterBefore(new JwtFilter(jwtProvider, redisUtil, principalDetailsService), UsernamePasswordAuthenticationFilter.class)
+                // 세션 사용 X
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // JWT 필터 추가
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 // 소셜 로그인 설정
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2LoginSuccessHandler)

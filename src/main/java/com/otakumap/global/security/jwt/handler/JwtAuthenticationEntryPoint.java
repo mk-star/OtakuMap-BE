@@ -16,6 +16,7 @@ import java.io.IOException;
 @Slf4j(topic = "UNAUTHORIZATION_EXCEPTION_HANDLER")
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         log.error("No Authorities", authException);

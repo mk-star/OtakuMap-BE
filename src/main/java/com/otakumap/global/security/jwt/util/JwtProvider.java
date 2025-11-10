@@ -1,145 +1,175 @@
 package com.otakumap.global.security.jwt.util;
 
-import com.otakumap.global.security.jwt.dto.JwtDTO;
-import com.otakumap.global.security.PrincipalDetailsService;
-import com.otakumap.global.apiPayload.code.status.ErrorStatus;
-import com.otakumap.global.apiPayload.exception.handler.AuthHandler;
-import com.otakumap.global.util.RedisUtil;
+import com.otakumap.global.security.jwt.properties.JwtProperties;
+import com.otakumap.global.security.service.TokenService;
+import com.otakumap.global.security.util.CookieUtil;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
-import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+
+import static com.otakumap.global.security.util.CookieUtil.REFRESH_TOKEN_COOKIE;
+
+/**
+ * JWT 토큰 생성, 검증, 쿠키 관리를 담당하는 유틸리티 클래스
+ */
 
 @Slf4j
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public class JwtProvider {
-    @Value("${spring.jwt.secret}")
-    private String secretKeyString;
 
-    private SecretKey secret;
+    private final TokenService tokenService;
+    private final CookieUtil cookieUtil;
+    private final JwtProperties jwtProperties;
 
-    @Value("${spring.jwt.token.access-expiration-time}")
-    private Long accessExpiration;
-
-    @Value("${spring.jwt.token.refresh-expiration-time}")
-    private Long refreshExpiration;
-
-    private final RedisUtil redisUtil;
-
-    @PostConstruct
-    public void init() {
-        this.secret = Keys.hmacShaKeyFor(secretKeyString.getBytes(StandardCharsets.UTF_8));
-    }
-
-    // AccessToken 생성
+    /**
+     * Access Token을 생성합니다.
+     *
+     * @param userId 사용자 ID
+     * @return JWT Access Token
+     */
     public String createAccessToken(Long userId) {
         Instant issuedAt = Instant.now();
-        Instant expiredAt = issuedAt.plusMillis(accessExpiration);
+        Instant expiredAt = issuedAt.plusMillis(jwtProperties.accessExpirationTime());
 
         return Jwts.builder()
-                .setHeader(Map.of("alg", "HS256", "typ", "JWT"))
-                .setSubject(String.valueOf(userId))
+                .subject(String.valueOf(userId))
                 .issuedAt(Date.from(issuedAt))
                 .expiration(Date.from(expiredAt))
-                .signWith(secret, SignatureAlgorithm.HS256)
+                .signWith(getAccessTokenKey(), Jwts.SIG.HS256)
                 .compact();
     }
 
-    // RefreshToken 생성 (UUID 이용)
-    public String createRefreshToken(Long userId) {
-        long expiredAt = System.currentTimeMillis() + refreshExpiration;
-
-        String refreshToken = UUID.randomUUID().toString();
-
-        redisUtil.set("RT::" + refreshToken, "USER::" + userId);
-        redisUtil.expire(refreshToken, expiredAt, TimeUnit.MILLISECONDS);
-
-        return refreshToken;
+    /**
+     * Refresh Token을 생성합니다.
+     *
+     * @return Refresh Token
+     */
+    public String createRefreshToken() {
+        return UUID.randomUUID().toString();
     }
 
-    // 헤더에서 토큰 추출
-    public String getAccessToken(HttpServletRequest request) {
-        String header = request.getHeader("Authorization");
-        if (header == null || !header.startsWith("Bearer ")) {
-            return null;
+    /**
+     * Refresh Token 과 token을 담을 쿠키를 생성하고 Redis에 저장합니다.
+     *
+     * @param userId 사용자 ID
+     * @param refreshToken 생성한 Refresh Token
+     * @return Refresh Token ResponseCookie
+     */
+    public ResponseCookie generateRefreshTokenCookie(Long userId, String refreshToken) {
+        // Redis에 Refresh Token 저장
+        tokenService.saveRefreshToken(userId, refreshToken);
+
+        return cookieUtil.createRefreshTokenCookie(REFRESH_TOKEN_COOKIE, refreshToken);
+    }
+
+    /**
+     * Access Token의 유효성을 검증합니다.
+     * 토큰이 유효하지 않거나 만료된 경우 예외를 발생시킵니다.
+     *
+     * @param token 검증할 Access Token
+     * @throws JwtException 토큰이 유효하지 않은 경우
+     * @throws ExpiredJwtException 토큰이 만료된 경우
+     */
+    public void validateAccessToken(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            throw new JwtException("Access token is null or empty");
         }
-        return header.split(" ")[1];
-    }
 
-    // AccessToken 유효성 확인
-    public boolean validateAccessToken(String token) {
         try {
-            Jws<Claims> claims = getClaims(token);
-            return claims.getBody().getExpiration().after(Date.from(Instant.now()));
-        } catch (JwtException e) {
-            log.error(e.getMessage());
-            return false;
-        } catch (Exception e) {
-            log.error(e.getMessage() + ": 토큰이 유효하지 않습니다.");
-            return false;
+            Claims claims = getClaims(token);
+            if (claims.getSubject() == null || claims.getSubject().trim().isEmpty()) {
+                throw new JwtException("Access token subject is missing");
+            }
+
+            // 만료됐을 경우
+            if (isExpired(claims)) {
+                throw new ExpiredJwtException(null, claims, "Access token has expired");
+            }
+        } catch (ExpiredJwtException e) {
+            log.debug("Access token expired: {}", e.getMessage());
+            throw e;
+        } catch (JwtException | IllegalArgumentException e) {
+            log.debug("Invalid access token: {}", e.getMessage());
+            throw new JwtException("Invalid access token", e);
         }
     }
 
-    // RefreshToken 유효성 확인
-    public void validateRefreshToken(JwtDTO request) {
-        //redis 확인
-        String key = "RT::" + request.getRefreshToken();
-
-        if (!redisUtil.exists(key)) {
-            throw new AuthHandler(ErrorStatus.INVALID_TOKEN);
-        }
-
-        String value = "USER::" + getId(request.getAccessToken());
-        if(value.equals(redisUtil.get(key))) {
-            throw new AuthHandler(ErrorStatus.INVALID_TOKEN);
-        }
-    }
-
-    //id(PK) 추출
-    public Long getId(String token) { return Long.parseLong(getClaims(token).getBody().getSubject()); }
-
-    //토큰의 클레임 가져오는 메서드
-    public Jws<Claims> getClaims(String token) {
+    /**
+     * Access Token에서 Claims를 추출합니다.
+     *
+     * @param token Access Token
+     * @return JWT Claims
+     * @throws JwtException 토큰 파싱 실패 시
+     */
+    public Claims getClaims(String token) {
         try {
             return Jwts.parser()
-                    .setSigningKey(secret)
+                    .verifyWith(getAccessTokenKey())
                     .build()
-                    .parseClaimsJws(token);
+                    .parseSignedClaims(token)
+                    .getPayload();
         } catch (Exception e) {
-            throw new AuthHandler(ErrorStatus.INVALID_TOKEN);
+            throw new JwtException("Failed to parse access token claims", e);
         }
     }
 
-    // 토큰 재발급
-    public JwtDTO reissueToken(JwtDTO request) throws SignatureException {
-        Long userId = getId(request.getAccessToken());
-
-        // 기존 Refresh Token을 삭제
-        redisUtil.delete("RT::" + request.getRefreshToken());
-
-        // 새로운 토큰 발급
-        return new JwtDTO(
-                createAccessToken(userId),
-                createRefreshToken(userId)
-        );
+    /**
+     * 토큰의 만료 여부를 확인합니다.
+     *
+     * @param claims JWT Claims 객체
+     * @return 만료된 경우 true, 그렇지 않으면 false
+     */
+    private boolean isExpired(Claims claims) {
+        if (claims == null || claims.getExpiration() == null) {
+            return true;
+        }
+        return claims.getExpiration().before(Date.from(Instant.now()));
     }
 
-    // 토큰 유효시간 반환
-    public Long getExpTime(String token) {
-        return getClaims(token).getPayload().getExpiration().getTime();
+    /**
+     * Access Token에서 사용자 ID를 추출합니다.
+     *
+     * @param token Access Token
+     * @return 사용자 ID
+     * @throws JwtException 토큰이 유효하지 않은 경우
+     */
+    public Long getUserIdFromToken(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            throw new JwtException("Token is null or empty");
+        }
+
+        try {
+            Claims claims = getClaims(token);
+
+            String userId = claims.getSubject();
+            if (userId == null || userId.trim().isEmpty()) {
+                throw new JwtException("Token subject is missing");
+            }
+
+            return Long.valueOf(userId);
+        } catch (JwtException e) {
+            log.debug("Failed to extract user ID from token: {}", e.getMessage());
+            throw e;
+        }
     }
+
+    /**
+     * JWT 생성/검증 시 서명 키를 생성합니다.
+     *
+     * @return SecretKey 객체
+     */
+    private SecretKey getAccessTokenKey() {
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.accessSecretKey()));
+    }
+
 }

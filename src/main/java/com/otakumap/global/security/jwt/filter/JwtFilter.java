@@ -1,79 +1,77 @@
 package com.otakumap.global.security.jwt.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.otakumap.global.security.PrincipalDetailsService;
 import com.otakumap.global.security.jwt.util.JwtProvider;
-import com.otakumap.global.apiPayload.ApiResponse;
-import com.otakumap.global.apiPayload.code.BaseErrorCode;
-import com.otakumap.global.apiPayload.code.status.ErrorStatus;
-import com.otakumap.global.apiPayload.exception.GeneralException;
-import com.otakumap.global.apiPayload.exception.handler.AuthHandler;
-import com.otakumap.global.util.RedisUtil;
+import com.otakumap.global.security.service.AuthContextService;
+import com.otakumap.global.security.service.TokenService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static com.otakumap.global.security.util.TokenUtil.extractTokenFromHeader;
+
+@Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
+
     private final JwtProvider jwtProvider;
-    private final RedisUtil redisUtil;
-    private final PrincipalDetailsService principalDetailsService;
+    private final AuthContextService authContextService;
+    private final TokenService tokenService;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String uri = request.getRequestURI();
+        if (isSystemUri(uri)) {
+            return true;
+        }
+        return super.shouldNotFilter(request);
+    }
+
+    /**
+     * 시스템 관련 URI 체크 (OAuth2, Swagger, 에러 페이지 등)
+     * 이러한 URI들은 Spring Security 또는 시스템에서 자동으로 처리되는 경로들
+     */
+    private boolean isSystemUri(String uri) {
+        return uri.startsWith("/oauth2/authorization")
+                || uri.startsWith("/oauth2/authorize")
+                || uri.startsWith("/login/oauth2/code")
+                || uri.startsWith("/api/auth")
+                || uri.equals("/")
+                || uri.startsWith("/error")
+                || uri.startsWith("/swagger")
+                || uri.startsWith("/swagger-ui")
+                || uri.startsWith("/v3/api-docs")
+                ;
+    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         try {
-            String accessToken = jwtProvider.getAccessToken(request);
+            // Authorization 헤더에서 Access Token 추출
+            String accessToken = extractTokenFromHeader(request);
 
             //JWT 유효성 검증
-            if(accessToken != null && jwtProvider.validateAccessToken(accessToken)) {
-                String blackListValue = (String) redisUtil.get("AT::" + accessToken);
-                if (blackListValue != null && blackListValue.equals("logout")) {
-                    throw new AuthHandler(ErrorStatus.TOKEN_LOGGED_OUT);
-                }
+            jwtProvider.validateAccessToken(accessToken);
 
-                Long userId = jwtProvider.getId(accessToken);
-                setAuthenticationToContext(userId, request);
+            // 블랙리스트 확인
+            if (tokenService.isAccessTokenBlacklisted(accessToken)) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is blacklisted");
+                return;
             }
+
+            authContextService.createAuthContext(accessToken);
             // 다음 필터로 넘기기
             filterChain.doFilter(request, response);
-        } catch (GeneralException e) {
-            BaseErrorCode code = e.getCode();
-            response.setContentType("application/json; charset=UTF-8");
-            response.setStatus(code.getReasonHttpStatus().getHttpStatus().value());
-
-            ApiResponse<Object> errorResponse = ApiResponse.onFailure(
-                    code.getReasonHttpStatus().getCode(),
-                    code.getReasonHttpStatus().getMessage(),
-                    e.getMessage());
-
-            ObjectMapper om = new ObjectMapper();
-            om.writeValue(response.getOutputStream(), errorResponse);
+        } catch (JwtException | IllegalArgumentException e) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         }
     }
 
-    private void setAuthenticationToContext(Long userId, HttpServletRequest request) {
-        UserDetails userDetails = principalDetailsService.loadUserById(userId);
-        if (userDetails == null) {
-            throw new AuthHandler(ErrorStatus.USER_NOT_FOUND);
-        }
-
-        //userDetails, password, role -> 접근 권한 인증 Token 생성
-        UsernamePasswordAuthenticationToken  authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getAuthorities());
-
-        // 클라이언트 요청 정보(IP, 세션 등) 저장
-        //authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-        //현재 Request의 Security Context에 접근 권한 설정
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
 }

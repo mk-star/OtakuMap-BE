@@ -1,4 +1,4 @@
-package com.otakumap.global.security;
+package com.otakumap.global.security.util;
 
 import com.otakumap.domain.user.entity.User;
 import com.otakumap.domain.user.repository.UserRepository;
@@ -13,16 +13,13 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class PrincipalDetailsService implements UserDetailsService {
+
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new AuthHandler(ErrorStatus.USER_NOT_FOUND));
+    public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
+        User user = userRepository.findById(Long.valueOf(id)).orElseThrow(() -> new AuthHandler(ErrorStatus.USER_NOT_FOUND));
         return new PrincipalDetails(user);
     }
 
-    public UserDetails loadUserById(Long id) throws UsernameNotFoundException {
-        User user = userRepository.findById(id).orElseThrow(() -> new AuthHandler(ErrorStatus.USER_NOT_FOUND));
-        return new PrincipalDetails(user);
-    }
 }

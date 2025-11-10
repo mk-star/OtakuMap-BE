@@ -4,7 +4,7 @@ import com.otakumap.domain.user.entity.User;
 import com.otakumap.domain.user.entity.enums.Role;
 import com.otakumap.domain.user.entity.enums.SocialType;
 import com.otakumap.domain.user.repository.UserRepository;
-import com.otakumap.global.security.PrincipalDetails;
+import com.otakumap.global.security.util.PrincipalDetails;
 import com.otakumap.global.security.oauth.userInfo.OAuth2UserInfo;
 import com.otakumap.global.util.UuidGenerator;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId(); // 어떤 OAuth2(카카오, 네이버, 구글)가 사용되었는지 식별
         SocialType socialType = SocialType.valueOf(registrationId.toUpperCase());
-        OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(registrationId, oAuth2User.getAttributes());
+        OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(socialType, oAuth2User.getAttributes());
 
         User user = getUser(oAuth2UserInfo, socialType);
 

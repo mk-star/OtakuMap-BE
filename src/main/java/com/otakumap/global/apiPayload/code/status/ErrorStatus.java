@@ -15,6 +15,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _BAD_REQUEST(HttpStatus.BAD_REQUEST,"COMMON400","잘못된 요청입니다."),
     _UNAUTHORIZED(HttpStatus.UNAUTHORIZED,"COMMON401","인증이 필요합니다."),
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
+    INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "COMMON404", "잘못된 입력 값입니다"),
 
     // 인증 관련 에러
     PASSWORD_NOT_EQUAL(HttpStatus.BAD_REQUEST, "AUTH4001", "비밀번호가 일치하지 않습니다."),
@@ -31,6 +32,7 @@ public enum ErrorStatus implements BaseErrorCode {
     // 멤버 관련 에러
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER4001", "사용자가 없습니다."),
     NICKNAME_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER4002", "이미 사용 중인 닉네임입니다."),
+    USERID_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "USER4003", "이미 사용 중인 아이디입니다."),
 
     // 명소 관련 에러
     PLACE_NOT_FOUND(HttpStatus.BAD_REQUEST, "PLACE4001", "존재하지 않는 명소입니다."),

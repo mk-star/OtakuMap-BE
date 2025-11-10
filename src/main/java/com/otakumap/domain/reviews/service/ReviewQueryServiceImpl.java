@@ -33,7 +33,7 @@ public class ReviewQueryServiceImpl implements ReviewQueryService {
     }
 
     @Override
-    @Cacheable(value = "views", key = "'top7Views'")
+    @Cacheable(cacheNames = "views", key = "'top7Views'")
     public ReviewResponseDTO.Top7ReviewPreViewListDTO getTop7Reviews() {
         return reviewRepositoryCustom.getTop7Reviews();
     }

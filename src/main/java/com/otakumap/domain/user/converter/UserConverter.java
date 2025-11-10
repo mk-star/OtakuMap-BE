@@ -35,11 +35,10 @@ public class UserConverter {
                 .build();
     }
 
-    public static AuthResponseDTO.LoginResultDTO toLoginResultDTO(Long userId, String accessToken, String refreshToken) {
+    public static AuthResponseDTO.LoginResultDTO toLoginResultDTO(Long userId, String accessToken) {
         return AuthResponseDTO.LoginResultDTO.builder()
                 .id(userId)
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
                 .build();
 
     }

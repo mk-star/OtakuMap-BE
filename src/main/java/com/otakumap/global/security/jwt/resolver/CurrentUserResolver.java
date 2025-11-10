@@ -1,9 +1,8 @@
 package com.otakumap.global.security.jwt.resolver;
 
 import com.otakumap.global.security.jwt.annotation.CurrentUser;
-import com.otakumap.global.security.PrincipalDetails;
+import com.otakumap.global.security.util.PrincipalDetails;
 import com.otakumap.domain.user.entity.User;
-import com.otakumap.domain.user.service.UserQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +19,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @RequiredArgsConstructor
 @Slf4j
 public class CurrentUserResolver implements HandlerMethodArgumentResolver {
+
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(CurrentUser.class) && parameter.getParameterType().isAssignableFrom(User.class);
@@ -32,9 +32,10 @@ public class CurrentUserResolver implements HandlerMethodArgumentResolver {
         if (authentication != null && authentication.isAuthenticated()) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof PrincipalDetails) {
-                return principal;
+                return ((PrincipalDetails) principal).getUser();
             }
         }
         return null;
     }
+
 }

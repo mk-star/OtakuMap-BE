@@ -1,15 +1,16 @@
-package com.otakumap.global.security;
+package com.otakumap.global.security.util;
 
 import com.otakumap.domain.user.entity.User;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
+@Getter
 public class PrincipalDetails implements UserDetails, OAuth2User {
+
     private final User user;
     private Map<String, Object> attributes;
 
@@ -26,12 +27,9 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<String> roles = new ArrayList<>();
-        roles.add(user.getRole().toString());
-
-        return roles.stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        Collection<GrantedAuthority> collect = new ArrayList<>();
+        collect.add(() -> user.getRole().toString());
+        return collect;
     }
 
     @Override
@@ -41,7 +39,7 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return user.getUserId();
     }
 
     @Override
@@ -71,6 +69,7 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
 
     @Override
     public String getName() {
-        return String.valueOf(user.getId());
+        return user.getName();
     }
+
 }

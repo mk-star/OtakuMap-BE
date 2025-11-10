@@ -12,13 +12,17 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @Service
 public class RedisUtil {
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
-    public void set(String key, Object value) {
+    public void set(String key, String value) {
         redisTemplate.opsForValue().set(key, value);
     }
 
-    public Object get(String key) {
+    public void set(String key, String value, long timeout, TimeUnit timeUnit) {
+        redisTemplate.opsForValue().set(key, value, timeout, timeUnit);
+    }
+
+    public String get(String key) {
         return redisTemplate.opsForValue().get(key);
     }
 
@@ -30,9 +34,8 @@ public class RedisUtil {
         redisTemplate.expire(key, timeout, unit);
     }
 
-
-    public boolean delete(String key) {
-        return Boolean.TRUE.equals(redisTemplate.delete(key));
+    public void delete(String key) {
+        redisTemplate.delete(key);
     }
 
 }
