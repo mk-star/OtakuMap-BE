@@ -2,14 +2,17 @@ package com.otakumap.global.apiPayload.exception;
 
 import com.otakumap.global.apiPayload.code.BaseErrorCode;
 import com.otakumap.global.apiPayload.code.ErrorReasonDTO;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public class GeneralException extends RuntimeException {
 
-    private BaseErrorCode code;
+    private final BaseErrorCode code;
+
+    public GeneralException(BaseErrorCode errorCode) {
+        super(errorCode.getReason().getMessage());
+        this.code = errorCode;
+    }
 
     public ErrorReasonDTO getErrorReason() {
         return this.code.getReason();

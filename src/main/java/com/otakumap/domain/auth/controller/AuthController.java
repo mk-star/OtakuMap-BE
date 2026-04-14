@@ -2,9 +2,10 @@ package com.otakumap.domain.auth.controller;
 
 import com.otakumap.domain.auth.dto.AuthRequestDTO;
 import com.otakumap.domain.auth.dto.AuthResponseDTO;
-import com.otakumap.domain.user.entity.User;
-import com.otakumap.global.security.jwt.annotation.CurrentUser;
-import com.otakumap.global.security.jwt.dto.TokenPair;
+import com.otakumap.domain.auth.dto.SignUpRequestDTO;
+import com.otakumap.domain.auth.dto.SignUpResponseDTO;
+import com.otakumap.global.security.jwt.dto.LoginRequestDTO;
+import com.otakumap.global.security.jwt.dto.TokenResponseDTO;
 import com.otakumap.domain.auth.service.AuthCommandService;
 import com.otakumap.domain.auth.service.AuthQueryService;
 import com.otakumap.domain.user.converter.UserConverter;
@@ -46,7 +47,7 @@ public class AuthController {
      */
     @Operation(summary = "회원가입", description = "회원가입 기능입니다.")
     @PostMapping("/signup")
-    public ApiResponse<AuthResponseDTO.SignupResultDTO> signup(@RequestBody @Valid AuthRequestDTO.SignupDTO request) {
+    public ApiResponse<SignUpResponseDTO> signup(@RequestBody @Valid SignUpRequestDTO request) {
         return ApiResponse.onSuccess(UserConverter.toSignupResultDTO(authCommandService.signup(request)));
     }
 
@@ -60,44 +61,45 @@ public class AuthController {
     @Operation(summary = "일반 로그인", description = "일반 로그인 기능입니다.")
     @PostMapping("/login")
     public ApiResponse<AuthResponseDTO.LoginResultDTO> login(
-            @RequestBody @Valid AuthRequestDTO.LoginDTO request,
+            @RequestBody @Valid LoginRequestDTO request,
             HttpServletResponse response
     ) {
 
         // 아이디, 비밀번호 비교 후 token 반환
-        TokenPair tokenPair = authCommandService.login(request);
+        TokenResponseDTO tokenResponse = authCommandService.login(request);
 
         // 새로운 쿠키 설정
-        response.addHeader(HttpHeaders.SET_COOKIE, tokenPair.cookie().toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, tokenResponse.cookie().toString());
 
-        return ApiResponse.onSuccess(UserConverter.toLoginResultDTO(tokenPair.id(), tokenPair.accessToken()));
+        return ApiResponse.onSuccess(UserConverter.toLoginResultDTO(tokenResponse.id(), tokenResponse.accessToken()));
     }
 
     @Operation(summary = "아이디 중복 확인", description = "아이디 중복 확인 기능입니다.")
-    @GetMapping("/check-id")
+    @GetMapping("/id/check")
     @Parameter(name = "userId", description = "아이디")
     public ApiResponse<AuthResponseDTO.CheckIdResultDTO> checkId(@RequestParam String userId) {
         return ApiResponse.onSuccess(UserConverter.toCheckIdResultDTO(authQueryService.checkId(userId)));
     }
 
     @Operation(summary = "이메일 중복 확인", description = "이메일 중복 확인 기능입니다.")
-    @GetMapping("/check-email")
+    @GetMapping("/email/check")
     @Parameter(name = "email", description = "이메일")
     public ApiResponse<AuthResponseDTO.CheckEmailResultDTO> checkEmail(@RequestParam String email) {
         return ApiResponse.onSuccess(UserConverter.toCheckEmailResultDTO(authQueryService.checkEmail(email)));
     }
 
     @Operation(summary = "이메일 인증 메일 전송", description = "이메일 인증을 위한 메일 전송 기능입니다.")
-    @PostMapping("/verify-email")
+    @PostMapping("/email/send")
     public ApiResponse<String> verifyEmail(@RequestBody @Valid AuthRequestDTO.VerifyEmailDTO request) {
         authCommandService.verifyEmail(request);
         return ApiResponse.onSuccess("인증 메일이 성공적으로 전송되었습니다.");
     }
 
     @Operation(summary = "이메일 코드 인증", description = "회원가입 시 이메일 코드 인증 기능입니다.")
-    @PostMapping("/verify-code")
-    public ApiResponse<AuthResponseDTO.VerifyCodeResultDTO> verifyEmail(@RequestBody @Valid AuthRequestDTO.VerifyCodeDTO request) {
-        return ApiResponse.onSuccess(UserConverter.toVerifyCodeResultDTO(authCommandService.verifyCode(request)));
+    @PostMapping("/email/verify")
+    public ApiResponse<String> verifyEmail(@RequestBody @Valid AuthRequestDTO.VerifyCodeDTO request) {
+        authCommandService.verifyCode(request);
+        return ApiResponse.onSuccess("이메일 코드가 인증되었습니다.");
     }
 
     /**
@@ -117,12 +119,12 @@ public class AuthController {
     ) {
 
         // 재발급한 토큰
-        TokenPair tokenPair = authCommandService.reissueToken(request, refreshTokenRequest);
+        TokenResponseDTO tokenResponseDTO = authCommandService.reissueToken(request, refreshTokenRequest);
 
         // 새로운 쿠키 생성
-        response.addHeader(HttpHeaders.SET_COOKIE, tokenPair.cookie().toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, tokenResponseDTO.cookie().toString());
 
-        return ApiResponse.onSuccess(UserConverter.toLoginResultDTO(tokenPair.id(), tokenPair.accessToken()));
+        return ApiResponse.onSuccess(UserConverter.toLoginResultDTO(tokenResponseDTO.id(), tokenResponseDTO.accessToken()));
     }
 
     /**
@@ -180,16 +182,17 @@ public class AuthController {
     }
 
     @Operation(summary = "비밀번호 찾기", description = "비밀번호 찾기 기능입니다.")
-    @PostMapping("/find-password")
+    @PostMapping("/password/send")
     public ApiResponse<String> findPassword(@RequestBody @Valid AuthRequestDTO.FindPasswordDTO request) {
         authCommandService.findPassword(request);
         return ApiResponse.onSuccess("인증 메일이 성공적으로 전송되었습니다.");
     }
 
     @Operation(summary = "비밀번호 찾기 코드 인증", description = "비밀번호 찾기 시 이메일 코드 인증 기능입니다.")
-    @PostMapping("/verify-password-code")
-    public ApiResponse<AuthResponseDTO.VerifyCodeResultDTO> verifyPasswordCode(@RequestBody @Valid AuthRequestDTO.VerifyResetCodeDTO request) {
-        return ApiResponse.onSuccess(UserConverter.toVerifyCodeResultDTO(authCommandService.verifyResetCode(request)));
+    @PostMapping("/password/verify")
+    public ApiResponse<String> verifyPasswordCode(@RequestBody @Valid AuthRequestDTO.VerifyResetCodeDTO request) {
+        authCommandService.verifyResetCode(request);
+        return ApiResponse.onSuccess("이메일 코드가 인증되었습니다.");
     }
 
 }

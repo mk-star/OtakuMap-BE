@@ -14,13 +14,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class UserConverter {
-    public static User toUser(AuthRequestDTO.SignupDTO request) {
+
+    public static User toUser(SignUpRequestDTO request) {
         return User.builder()
-                .name(request.getName())
+                .name(request.name())
                 .nickname(UuidGenerator.generateUuid())
-                .userId(request.getUserId())
-                .email(request.getEmail())
-                .password(request.getPassword())
+                .userId(request.userId())
+                .email(request.email())
+                .password(request.password())
                 .isCommunityActivityNotified(true)
                 .isEventBenefitsNotified(true)
                 .role(Role.USER)
@@ -28,11 +29,18 @@ public class UserConverter {
                 .build();
     }
 
-    public static AuthResponseDTO.SignupResultDTO toSignupResultDTO(User user) {
-        return AuthResponseDTO.SignupResultDTO.builder()
-                .id(user.getId())
-                .createdAt(LocalDateTime.now())
+    public static User toUser(Long id, String password) {
+        return User.builder()
+                .id(id)
+                .password(password)
                 .build();
+    }
+
+    public static SignUpResponseDTO toSignupResultDTO(User user) {
+        return new SignUpResponseDTO(
+                user.getId(),
+                LocalDateTime.now()
+        );
     }
 
     public static AuthResponseDTO.LoginResultDTO toLoginResultDTO(Long userId, String accessToken) {

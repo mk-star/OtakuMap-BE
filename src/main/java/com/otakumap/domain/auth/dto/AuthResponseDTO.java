@@ -13,15 +13,6 @@ public class AuthResponseDTO {
     @AllArgsConstructor
     @NoArgsConstructor
     @Builder
-    public static class SignupResultDTO {
-        Long id;
-        LocalDateTime createdAt;
-    }
-
-    @Getter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Builder
     public static class LoginResultDTO {
         Long id;
         String accessToken;
